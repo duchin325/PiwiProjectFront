@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState } from 'react';
 import type { Driver } from '@/app/lib/types';
 import { DriverForm } from '@/components/drivers/DriverForm';
@@ -53,7 +54,11 @@ export default function DriversPage() {
             <article key={driver.id} className="card p-5 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-semibold text-lg">{driver.name}</h2>
+                  <h2 className="font-semibold text-lg">
+                    <Link href={`/drivers/${driver.id}`} className="hover:underline">
+                      {driver.name}
+                    </Link>
+                  </h2>
                   <p className="text-sm text-gray-600">Licencia: {driver.licenseNumber}</p>
                 </div>
                 <span className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium">
@@ -67,6 +72,9 @@ export default function DriversPage() {
               </div>
 
               <div className="flex gap-2">
+                <Link href={`/drivers/${driver.id}`} className="btn btn-primary">
+                  Ver detalle
+                </Link>
                 <button
                   className="btn btn-secondary"
                   onClick={() => {
