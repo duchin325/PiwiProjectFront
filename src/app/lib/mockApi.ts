@@ -271,6 +271,13 @@ export const mockApi = {
     return [...drivers];
   },
 
+  async getDriver(id: string): Promise<Driver> {
+    await wait(200);
+    const driver = drivers.find((item) => item.id === id);
+    if (!driver) throw new Error('Conductor no encontrado');
+    return driver;
+  },
+
   async createDriver(data: Omit<Driver, 'id'>): Promise<Driver> {
     await wait(200);
     const newDriver: Driver = { ...data, id: `d${drivers.length + 1}` };

@@ -42,6 +42,17 @@ export async function listDrivers(): Promise<Driver[]> {
   }
 }
 
+export async function getDriver(id: string): Promise<Driver> {
+  if (USE_MOCK_DRIVERS) return mockApi.getDriver(id);
+  try {
+    const { data } = await api.get<BackendDriver>(`/drivers/${id}`);
+    return normalizeDriver(data);
+  } catch (err) {
+    logMockFallback(`No se pudo obtener el conductor ${id}`, err);
+    return mockApi.getDriver(id);
+  }
+}
+
 export async function createDriver(input: Omit<Driver, 'id'>): Promise<Driver> {
   if (USE_MOCK_DRIVERS) return mockApi.createDriver(input);
   try {
