@@ -115,7 +115,7 @@ export async function createTrip(data: Omit<Trip, 'id'>): Promise<Trip> {
   try {
     const payload = toBackendTrip(data);
     const { data: created } = await api.post<{ id: number }>('/trips', payload);
-    return { ...data, id: String(created.id) };
+    return getTrip(String(created.id));
   } catch (err) {
     logMockFallback('Error creando viaje', err);
     return mockApi.createTrip(data);
