@@ -58,7 +58,7 @@ export async function createDriver(input: Omit<Driver, 'id'>): Promise<Driver> {
   try {
     const payload = toBackendDriver(input);
     const { data } = await api.post<{ id: number }>('/drivers', payload);
-    return { ...input, id: String(data.id) };
+    return getDriver(String(data.id));
   } catch (err) {
     logMockFallback('Error creando conductor', err);
     return mockApi.createDriver(input);
@@ -77,12 +77,7 @@ export async function updateDriver(id: string, patch: Partial<Driver>): Promise<
     };
 
     await api.put(`/drivers/${id}`, payload);
-    const drivers = await listDrivers();
-    const updated = drivers.find((driver) => driver.id === id);
-    if (!updated) {
-      throw new Error('Conductor no encontrado luego de actualizar');
-    }
-    return updated;
+    return getDriver(id);
   } catch (err) {
     logMockFallback(`No se pudo actualizar el conductor ${id}`, err);
     return mockApi.updateDriver(id, patch);
