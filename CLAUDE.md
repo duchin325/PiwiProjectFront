@@ -34,8 +34,8 @@ src/app/
 │   ├── dashboard/
 │   ├── shipments/[id]/     # Dynamic detail pages
 │   ├── clients/[id]/
-│   ├── drivers/
-│   └── trips/[id]/
+│   ├── drivers/            # List only — no detail page
+│   └── trips/[id]/         # Detail page doubles as printable route sheet
 ├── auth/                   # Public auth pages
 │   ├── login/
 │   └── register/
@@ -44,12 +44,12 @@ src/app/
         ├── login/          # Sets httpOnly cookie
         └── logout/         # Clears cookie
 ```
-Page routes use optional catch-all: `[id]` folder for detail views with dynamic routing.
+Detail views use standard Next.js dynamic segments (`[id]`). The `trips/[id]` page renders a printable A4 route sheet (`print-sheet` class) hidden in screen view and an editable stops interface (`no-print` class) hidden in print view. Call `window.print()` to trigger it.
 
 #### 3. Data Layer & Mock/Real API Switching
 - **Data adapters**: `src/app/lib/data/[entity].ts` (clients.ts, shipments.ts, drivers.ts, trips.ts)
 - **Mock API**: `src/app/lib/mockApi.ts` - Complete in-memory implementation with artificial delays
-- **Switching via env**: `NEXT_PUBLIC_USE_MOCK`, `NEXT_PUBLIC_USE_MOCK_CLIENTS`, `NEXT_PUBLIC_USE_MOCK_SHIPMENTS`, etc.
+- **Switching via env**: `NEXT_PUBLIC_USE_MOCK`, `NEXT_PUBLIC_USE_MOCK_CLIENTS`, `NEXT_PUBLIC_USE_MOCK_SHIPMENTS`, etc. — **mock is on by default** (`resolveMockMode` returns `true` unless the env var is explicitly `'false'`)
 - **Fallback pattern**: Real API calls with automatic fallback to mock on error (see `logMockFallback()`)
 - **Backend normalization**: Data adapters normalize between frontend types and backend DTOs (e.g., `ShipmentStatus` maps to `BackendOrderStatus`)
 - **API base URL**: `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001`)
@@ -57,8 +57,9 @@ Page routes use optional catch-all: `[id]` folder for detail views with dynamic 
 #### 4. State Management & Hooks
 - **No Redux/Context state beyond auth** - uses local React hooks with useState
 - **Custom hooks** in `src/hooks/`: `useAuth.ts`, `useClients.ts`, `useShipments.ts`, `useDrivers.ts`, `useTrips.ts`
-- **Hook pattern**: Each returns `{ data, loading, error, refresh, create, update, remove, ...}` 
-- **Notification integration**: Hooks use `notify.promise()` to show loading/success/error toasts
+- **Standard hook pattern**: Returns `{ data, loading, error, refresh, create, update, remove, ... }` — used by clients, shipments, drivers
+- **Trips is different**: `useTrips.ts` exports two hooks: `useTrips()` returns `{ trips, loading, refreshTrips, createTrip, updateTrip, deleteTrip }` and `useRouteStops(tripId)` returns `{ stops, loading, refreshStops, addStop, updateStop, deleteStop }`. Note the naming diverges from the standard pattern (no `data`, no `remove`).
+- **Notification integration**: Standard hooks use `notify.promise()` for loading/success/error toasts; `useTrips` calls `notify.success/error` directly
 - **Client-side only**: All hooks marked `'use client'`
 
 #### 5. Component Structure
@@ -71,6 +72,7 @@ Page routes use optional catch-all: `[id]` folder for detail views with dynamic 
 - Central types in `src/app/lib/types.ts`: `User`, `Shipment`, `Client`, `Driver`, `Trip`, `RouteStop`
 - Enums: `Role` ('admin' | 'operator'), `ShipmentStatus` ('pending' | 'active' | 'completed'), `tripStatus`, `RouteStopType`
 - All IDs are strings in frontend (normalized from backend numbers)
+- Spanish display labels for all enums in `src/app/lib/labels.ts` — always import from there (`shipmentStatusLabels`, `tripStatusLabels`, `routeStopTypeLabels`) instead of hardcoding strings
 
 #### 7. Styling & CSS
 - Tailwind CSS 4 with custom utility classes defined in `src/app/globals.css`

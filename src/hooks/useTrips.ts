@@ -85,15 +85,21 @@ export function useTrips() {
   };
 }
 
-export function useRouteStops(tripId: string) {
+export function useRouteStops(tripId?: string) {
   const [stops, setStops] = useState<RouteStop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const refreshStops = async () => {
+    if (!tripId) {
+      setStops([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await tripsData.listRouteStopsByTrip(tripId);
-      setStops(result);
+      setStops(sortStops(result));
     } catch {
       notify.error('Error al cargar las paradas');
     } finally {
@@ -139,11 +145,17 @@ export function useRouteStops(tripId: string) {
   };
 
   useEffect(() => {
+    if (!tripId) {
+      setStops([]);
+      setLoading(false);
+      return;
+    }
+
     const loadStops = async () => {
       setLoading(true);
       try {
         const result = await tripsData.listRouteStopsByTrip(tripId);
-        setStops(result);
+        setStops(sortStops(result));
       } catch {
         notify.error('Error al cargar las paradas');
       } finally {
