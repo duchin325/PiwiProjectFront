@@ -25,7 +25,7 @@ const toBackendClient = (input: Omit<Client, 'id'> | Partial<Client>) => ({
   ...(input.name !== undefined ? { name: input.name } : {}),
   ...(input.email !== undefined ? { email: input.email } : {}),
   ...(input.phone !== undefined ? { phone: input.phone || null } : {}),
-  ...(input.address !== undefined ? { address: input.address || null } : {}),
+  ...(input.address ? { address: input.address } : {}),
 });
 
 export async function listClients(): Promise<Client[]> {
