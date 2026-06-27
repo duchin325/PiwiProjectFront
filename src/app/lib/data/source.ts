@@ -18,10 +18,14 @@ export const API_BASE_URL =
   'http://localhost:3001';
 
 export async function fetchJson<T = unknown>(path: string, init?: RequestInit): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const authHeader: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...init?.headers,
     },
   });
